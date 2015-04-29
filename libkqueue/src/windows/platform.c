@@ -55,9 +55,10 @@ void libkqueue_thread_attach(){
 }
 
 struct event_buf *_iocp_buf() {
+  struct event_buf* ev_buf;
   if (!event_buf_tls_init)
     libkqueue_process_attach();
-  struct event_buf* ev_buf = ((struct event_buf*)TlsGetValue(event_buf_tls));
+  ev_buf = ((struct event_buf*)TlsGetValue(event_buf_tls));
   if (!ev_buf) {
     dbg_puts("AAARrrr, no iocp_buf? fixing up missing libkqueue_thread_attach");
     ev_buf = _libkqueue_thread_attach();
