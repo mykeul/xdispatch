@@ -62,6 +62,9 @@ static struct map *kqmap;
 void
 libkqueue_init(void)
 {
+#ifdef _WIN32
+    WSADATA wsaData;
+#endif//_WIN32
 #ifdef NDEBUG
     DEBUG_KQUEUE = 0;
 #else
@@ -71,7 +74,6 @@ libkqueue_init(void)
 
 #ifdef _WIN32
     /* Initialize the Winsock library */
-    WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) 
         abort();
 #endif
