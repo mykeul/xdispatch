@@ -38,6 +38,8 @@ long
 	return 0;
 }	
 
+static void(*_dispatch_thread_initializer)(void) = NULL;
+
 static struct dispatch_semaphore_s _dispatch_thread_mediator[] = {
 	{
 		&_dispatch_semaphore_vtable,        /* .do_vtable */
@@ -1663,6 +1665,10 @@ void *
 	(void)dispatch_assume_zero(r);
 #endif
 
+	if (_dispatch_thread_initializer) {
+		_dispatch_thread_initializer();
+	}
+
 	do {
 		_dispatch_worker_thread2(context);
 		// we use 65 seconds in case there are any timers that run once a minute
@@ -1690,6 +1696,10 @@ void
 
 	_dispatch_thread_setspecific(dispatch_queue_key, dq);
 	qc->dgq_pending = 0;
+
+	if (_dispatch_thread_initializer) {
+		_dispatch_thread_initializer();
+	}
 
 #if DISPATCH_COCOA_COMPAT
 	// ensure that high-level memory management techniques do not leak/crash
@@ -2035,5 +2045,11 @@ DISPATCH_NOINLINE
 	dispatch_source_set_cancel_handler_f(ds, _dispatch_after_timer_cancel);
 	dispatch_source_set_timer(ds, when, 0, 0);
 	dispatch_resume(ds);
+}
+
+void
+	dispatch_set_thread_initializer(void(*func)(void))
+{
+	_dispatch_thread_initializer = func;
 }
 
