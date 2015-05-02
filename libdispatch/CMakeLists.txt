@@ -49,6 +49,13 @@ check_symbol_exists( CLOCK_UPTIME "time.h" HAVE_DECL_CLOCK_UPTIME)
 check_symbol_exists( CLOCK_MONOTONIC "time.h" HAVE_DECL_CLOCK_MONOTONIC)
 check_function_exists( sysconf HAVE_SYSCONF)
 
+find_package(JNI QUIET)
+if(JNI_FOUND)
+	add_definitions(-DHAVE_JNI)
+	include_directories(${JNI_INCLUDE_DIRS})
+	set(LIBS ${LIBS} ${JAVA_JVM_LIBRARY})
+endif()
+
 if(LINUX)
     set(LIBS ${LIBS} rt m)
 endif()

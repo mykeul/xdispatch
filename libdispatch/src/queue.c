@@ -2053,3 +2053,36 @@ void
 	_dispatch_thread_initializer = func;
 }
 
+#if HAVE_JNI
+#include <jni.h>
+
+static void
+	_dispatch_jvm_thread_initializer(void)
+{
+	static volatile LONG thread_count = -1;
+	jint count;
+	JavaVM* jvm;
+	JNIEnv* jenv;
+	char name[32];
+	JavaVMAttachArgs jvmaa = { JNI_VERSION_1_2, name, NULL };
+
+	if (JNI_OK != JNI_GetCreatedJavaVMs(&jvm, 1, &count)) {
+		_dispatch_log("JNI_GetCreatedJavaVMs failed");
+		return;
+	}
+	if (1 != count) {
+		_dispatch_log("Expected 1 jvm, found %d", count);
+		return;
+	}
+	snprintf(name, sizeof(name), "libdispatch-Thread-%d", dispatch_atomic_inc(&thread_count));
+	if (JNI_OK != (*jvm)->AttachCurrentThread(jvm, (void**)&jenv, &jvmaa)) {
+		_dispatch_log("JNI_AttachCurrentThread failed");
+	}
+}
+
+void
+	dispatch_enable_jvm_thread_initializer(void)
+{
+	dispatch_set_thread_initializer(_dispatch_jvm_thread_initializer);
+}
+#endif//HAVE_JNI

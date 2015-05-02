@@ -424,6 +424,18 @@ DISPATCH_EXPORT
 void
 dispatch_main(void);
 
+#if HAVE_JNI
+/**
+ * Enables an initialization function to attach (AttachCurrentThread) new libdispatch threads to existing JVM.
+ *
+ * @remarks This function should be called during startup when libdispatch is used within a JVM.
+ */
+
+DISPATCH_EXPORT
+void
+dispatch_enable_jvm_thread_initializer(void);
+#endif//HAVE_JNI
+
 /**
  * Schedule a block for execution on a given queue at a specified time.
  *
